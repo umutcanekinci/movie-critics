@@ -15,11 +15,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-public class Type1MainFrame extends javax.swing.JFrame {
+public class Type1MainFrame extends BaseMainFrame {
 
     private static final String TAB_ACCOUNTS  = "Accounts";
     private static final String TAB_MOVIES    = "Movies";
@@ -28,35 +26,42 @@ public class Type1MainFrame extends javax.swing.JFrame {
     private static final int MOVIE_COLS      = 4;
     private static final int MOVIES_PER_PAGE = MOVIE_COLS;
 
-    private final transient DatabaseManager dbManager;
-    private final transient User user;
-
     private transient List<Movie> allMovies      = new ArrayList<>();
     private transient List<Movie> filteredMovies = new ArrayList<>();
     private transient List<User>  allUsers       = new ArrayList<>();
     private int moviePage = 0;
 
-    private String activeTab = TAB_ACCOUNTS;
-    private final Map<String, JLabel> tabLabels = new LinkedHashMap<>();
-
-    private JPanel  contentArea;
-    private JButton prevBtn;
-    private JButton nextBtn;
     private JTextField        filterTitle;
     private JComboBox<String> filterGenre;
     private JComboBox<String> filterDirector;
     private JComboBox<String> filterYear;
 
     public Type1MainFrame(DatabaseManager dbManager, User user) {
-        this.dbManager = dbManager;
-        this.user      = user;
-        setUndecorated(true);
-        initComponents();
-        setExtendedState(MAXIMIZED_BOTH);
+        super(dbManager, user, TAB_ACCOUNTS);
+
+        initSharedComponents();
         reload();
         showTab(TAB_ACCOUNTS);
-        rootPane.registerKeyboardAction(e -> { new LoginFrame().setVisible(true); dispose(); },
-            KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+        setExtendedState(MAXIMIZED_BOTH);
+    }
+
+    @Override
+    protected String[] getTabNames() {
+        return new String[]{TAB_ACCOUNTS, TAB_MOVIES, TAB_ANALYTICS};
+    }
+
+    @Override
+    protected void onTabClicked(String tab) {
+        showTab(tab); // Artık tab repainting yapmana gerek yok, Base class hallediyor
+    }
+
+    @Override
+    protected void navigate(int dir) {
+        int maxPage = Math.max(0, (int) Math.ceil((double) filteredMovies.size() / MOVIES_PER_PAGE) - 1);
+        int next = moviePage + dir;
+        if (next < 0 || next > maxPage) return;
+        moviePage = next;
+        refreshMovieGrid();
     }
 
     private void reload() {
@@ -64,109 +69,6 @@ public class Type1MainFrame extends javax.swing.JFrame {
         allUsers  = dbManager.getAllUsers();
         filteredMovies = new ArrayList<>(allMovies);
     }
-
-    private void initComponents() {
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(buildHeader(),  BorderLayout.NORTH);
-        getContentPane().add(buildWrapper(), BorderLayout.CENTER);
-        JPanel footer = new JPanel();
-        footer.setBackground(WidgetFactory.DARK);
-        footer.setPreferredSize(new Dimension(0, 50));
-        getContentPane().add(footer, BorderLayout.SOUTH);
-        pack();
-    }
-
-
-    private JPanel buildHeader() {
-        JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(WidgetFactory.DARK);
-        header.setPreferredSize(new Dimension(0, 80));
-        header.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(45, 45, 45)),
-            BorderFactory.createEmptyBorder(0, 40, 0, 40)));
-        header.add(buildLogo(),    BorderLayout.WEST);
-        header.add(buildNavBar(),  BorderLayout.CENTER);
-        header.add(buildUserTag(), BorderLayout.EAST);
-        return header;
-    }
-
-    private JPanel buildLogo() {
-        JLabel logo = new JLabel(new ImageIcon(getClass().getResource("/logo.png")));
-        logo.setOpaque(false);
-        JPanel w = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        w.setOpaque(false);
-        w.add(logo);
-        return w;
-    }
-
-    private JPanel buildUserTag() {
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        p.setOpaque(false);
-        JLabel lbl = new JLabel("Hi, " + user.getUsername());
-        lbl.setForeground(new Color(180, 180, 180));
-        lbl.setFont(new Font(WidgetFactory.FONT, Font.PLAIN, 14));
-        p.add(lbl);
-        return p;
-    }
-
-    private JPanel buildNavBar() {
-        JPanel nav = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 0));
-        nav.setOpaque(false);
-        for (String tab : new String[]{TAB_ACCOUNTS, TAB_MOVIES, TAB_ANALYTICS}) {
-            JLabel lbl = new JLabel(tab) {
-                @Override protected void paintComponent(Graphics g) {
-                    super.paintComponent(g);
-                    if (activeTab.equals(tab)) {
-                        g.setColor(Color.WHITE);
-                        g.fillRect(0, getHeight() - 3, getWidth(), 3);
-                    }
-                }
-            };
-            lbl.setForeground(Color.WHITE);
-            lbl.setFont(new Font(WidgetFactory.FONT, Font.BOLD, 18));
-            lbl.setVerticalAlignment(SwingConstants.CENTER);
-            lbl.setPreferredSize(new Dimension(lbl.getPreferredSize().width, 78));
-            lbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            lbl.addMouseListener(new MouseAdapter() {
-                @Override public void mouseClicked(MouseEvent e) { showTab(tab); }
-            });
-            tabLabels.put(tab, lbl);
-            nav.add(lbl);
-        }
-        return nav;
-    }
-
-
-    private JPanel buildWrapper() {
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.setBackground(WidgetFactory.PURPLE);
-
-        prevBtn = WidgetFactory.createArrowButton("←"); prevBtn.addActionListener(e -> navigate(-1));
-        nextBtn = WidgetFactory.createArrowButton("→"); nextBtn.addActionListener(e -> navigate(1));
-        wrapper.add(centeredArrowPane(prevBtn), BorderLayout.WEST);
-        wrapper.add(centeredArrowPane(nextBtn), BorderLayout.EAST);
-
-        JPanel padded = new JPanel(new BorderLayout());
-        padded.setBackground(WidgetFactory.PURPLE);
-        padded.setBorder(BorderFactory.createEmptyBorder(20, 20, 40, 20));
-
-        contentArea = new JPanel(new GridLayout(1, MOVIE_COLS, 24, 24));
-        contentArea.setBackground(WidgetFactory.PURPLE);
-        contentArea.setOpaque(false);
-        padded.add(contentArea, BorderLayout.CENTER);
-        wrapper.add(padded, BorderLayout.CENTER);
-        return wrapper;
-    }
-
-    private JPanel centeredArrowPane(JButton btn) {
-        JPanel p = new JPanel(new GridBagLayout());
-        p.setBackground(WidgetFactory.PURPLE);
-        p.setPreferredSize(new Dimension(90, 0));
-        p.add(btn);
-        return p;
-    }
-
 
     private void showTab(String tab) {
         activeTab = tab;
@@ -177,15 +79,6 @@ public class Type1MainFrame extends javax.swing.JFrame {
             case TAB_ANALYTICS -> { prevBtn.setVisible(false); nextBtn.setVisible(false); refreshAnalytics();   }
             default            -> { prevBtn.setVisible(false); nextBtn.setVisible(false); }
         }
-    }
-
-
-    private void navigate(int dir) {
-        int maxPage = Math.max(0, (int) Math.ceil((double) filteredMovies.size() / MOVIES_PER_PAGE) - 1);
-        int next = moviePage + dir;
-        if (next < 0 || next > maxPage) return;
-        moviePage = next;
-        refreshMovieGrid();
     }
 
     private void refreshMovieGrid() {
