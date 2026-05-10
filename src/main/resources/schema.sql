@@ -109,15 +109,16 @@ INSERT INTO person (first_name, last_name, date_of_birth, nationality) VALUES
 ('Christian', 'Bale', '1974-01-30', 'British-American');
 
 INSERT INTO movie (title, release_year, language, country_of_origin, genre, director_id, is_watched, leading_actor_id, supporting_actor_id, about, rating, comments, poster, parental_restriction) VALUES
-('Inception', 2010, 'English', 'USA', 'Sci-Fi', '1', 1, '2', '3', 'A thief who steals corporate secrets through dream-sharing technology is given the task of planting an idea.', 9, 'Brilliant and complex.', NULL, 0),
-('The Dark Knight', 2008, 'English', 'USA', 'Action', '1', 1, '5', '4', 'When the Joker emerges to wreak havoc on Gotham, Batman must confront his greatest challenge.', 10, 'Greatest superhero film ever made.', NULL, 0),
-('The Prestige', 2006, 'English', 'USA', 'Drama', '1', 0, '5', '2', 'Two rival magicians engage in a dangerous battle to create the ultimate illusion.', 9, 'Captivating from start to finish.', NULL, 0),
-('Interstellar', 2014, 'English', 'USA', 'Sci-Fi', '1', 1, '2', '3', 'A team of explorers travel through a wormhole in search of a new home for humanity.', 9, 'Emotionally stunning and scientifically fascinating.', NULL, 0),
-('Toy Story', 1995, 'English', 'USA', 'Animation', '1', 1, '2', '3', 'A cowboy toy is threatened by the arrival of a new spaceman toy.', 8, 'A timeless classic for all ages.', NULL, 0),
-('The Wolf of Wall Street', 2013, 'English', 'USA', 'Biography', '1', 0, '2', '3', 'The rise and fall of stockbroker Jordan Belfort.', 7, 'Intense but very adult.', NULL, 1),
-('Pulp Fiction', 1994, 'English', 'USA', 'Crime', '1', 1, '2', '3', 'Interconnected stories of crime in Los Angeles.', 9, 'Iconic dialogue and storytelling.', NULL, 1);
+('Inception', 2010, 'English', 'USA', 'Sci-Fi', '1', 1, '2', '3', 'A thief who steals corporate secrets through dream-sharing technology is given the task of planting an idea.', 9, 'Brilliant and complex.', 'C:\Users\user\Desktop\projects\movie-critics\src\main\resources\inception.png', 0),
+('The Dark Knight', 2008, 'English', 'USA', 'Action', '1', 1, '5', '4', 'When the Joker emerges to wreak havoc on Gotham, Batman must confront his greatest challenge.', 10, 'Greatest superhero film ever made.', 'C:\Users\user\Desktop\projects\movie-critics\src\main\resources\the_dark_knight.png', 0),
+('The Prestige', 2006, 'English', 'USA', 'Drama', '1', 0, '5', '2', 'Two rival magicians engage in a dangerous battle to create the ultimate illusion.', 9, 'Captivating from start to finish.', 'C:\Users\user\Desktop\projects\movie-critics\src\main\resources\the_prestige.png', 0),
+('Interstellar', 2014, 'English', 'USA', 'Sci-Fi', '1', 1, '2', '3', 'A team of explorers travel through a wormhole in search of a new home for humanity.', 9, 'Emotionally stunning and scientifically fascinating.', 'C:\Users\user\Desktop\projects\movie-critics\src\main\resources\interstellar.png', 0),
+('Toy Story', 1995, 'English', 'USA', 'Animation', '1', 1, '2', '3', 'A cowboy toy is threatened by the arrival of a new spaceman toy.', 8, 'A timeless classic for all ages.', 'C:\Users\user\Desktop\projects\movie-critics\src\main\resources\toy_story.png', 0),
+('The Wolf of Wall Street', 2013, 'English', 'USA', 'Biography', '1', 0, '2', '3', 'The rise and fall of stockbroker Jordan Belfort.', 7, 'Intense but very adult.', 'C:\Users\user\Desktop\projects\movie-critics\src\main\resources\the_wolf_of_wall_street.png', 1),
+('Pulp Fiction', 1994, 'English', 'USA', 'Crime', '1', 1, '2', '3', 'Interconnected stories of crime in Los Angeles.', 9, 'Iconic dialogue and storytelling.', 'C:\Users\user\Desktop\projects\movie-critics\src\main\resources\pulp_fiction.png', 1);
 
 INSERT OR IGNORE INTO user (username, password, user_type, email) VALUES
+('a', 'a', 1, 'admin@moviecritics.com'),
 ('admin', 'admin123', 1, 'admin@moviecritics.com'),
 ('parent1', 'pass123', 1, 'parent1@example.com'),
 ('child1', 'pass123', 0, 'child1@example.com'),

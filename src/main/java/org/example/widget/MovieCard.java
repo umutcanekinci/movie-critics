@@ -12,11 +12,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-
 public class MovieCard extends JPanel {
     private final Movie movie;
     private BufferedImage posterImg;
     private boolean hovered;
+
+    // Animasyon değişkenleri
+    private Timer animTimer;
+    private float currentScale = 1.0f;
+    private float targetScale = 1.0f;
 
     public MovieCard(Movie movie, Runnable onEdit) {
         this.movie = movie;
@@ -27,10 +31,34 @@ public class MovieCard extends JPanel {
         if (path != null && !path.isBlank()) {
             try { posterImg = ImageIO.read(new File(path)); } catch (IOException ignored) {}
         }
+
+        // Animasyon Timer'ı (Saniyede ~60 kare çalışır, pürüzsüz büyüme/küçülme sağlar)
+        animTimer = new Timer(16, e -> {
+            // Easing (Yumuşak geçiş) formülü
+            currentScale += (targetScale - currentScale) * 0.15f; 
+            
+            // Hedefe yeterince yaklaştıysa timer'ı durdur (performans için)
+            if (Math.abs(currentScale - targetScale) < 0.002f) {
+                currentScale = targetScale;
+                animTimer.stop();
+            }
+            repaint();
+        });
+
         addMouseListener(new MouseAdapter() {
-            @Override public void mouseEntered(MouseEvent e) { hovered = true;  repaint(); }
-            @Override public void mouseExited(MouseEvent e)  { hovered = false; repaint(); }
-            @Override public void mouseClicked(MouseEvent e) { onEdit.run(); }
+            @Override public void mouseEntered(MouseEvent e) { 
+                hovered = true; 
+                targetScale = 1.04f; // %4 Büyü
+                animTimer.start(); 
+            }
+            @Override public void mouseExited(MouseEvent e)  { 
+                hovered = false; 
+                targetScale = 1.0f; // Normal boyuta dön
+                animTimer.start(); 
+            }
+            @Override public void mouseClicked(MouseEvent e) { 
+                onEdit.run(); 
+            }
         });
     }
 
@@ -39,9 +67,19 @@ public class MovieCard extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
+        // -- ANİMASYON MERKEZİ (Ölçekleme) --
+        // Büyüme işleminin sol üst köşeden değil, tam merkezden olmasını sağlar
+        double centerX = getWidth() / 2.0;
+        double centerY = getHeight() / 2.0;
+        g2.translate(centerX, centerY);
+        g2.scale(currentScale, currentScale);
+        g2.translate(-centerX, -centerY);
+        // ------------------------------------
+
         int titleH = 36;
         int imgH   = getHeight() - titleH - 8;
 
+        // Afiş ve Arka Plan Çizimi
         g2.setClip(new RoundRectangle2D.Float(0, 0, getWidth(), imgH, 10, 10));
         if (posterImg != null) {
             g2.drawImage(posterImg, 0, 0, getWidth(), imgH, this);
@@ -49,17 +87,21 @@ public class MovieCard extends JPanel {
             g2.setColor(WidgetFactory.CARD_BG);
             g2.fillRoundRect(0, 0, getWidth(), imgH, 10, 10);
         }
+        
+        // Hover Mor Filtre
         if (hovered) {
             g2.setColor(new Color(140, 82, 255, 80));
             g2.fillRect(0, 0, getWidth(), imgH);
         }
         g2.setClip(null);
 
+        // Başlık Çizimi
         g2.setFont(new Font(WidgetFactory.FONT, Font.BOLD, 15));
         g2.setColor(Color.WHITE);
         FontMetrics fm = g2.getFontMetrics();
         String title = ellipsize(g2, movie.getTitle(), getWidth());
         g2.drawString(title, (getWidth() - fm.stringWidth(title)) / 2, imgH + 8 + fm.getAscent());
+        
         g2.dispose();
     }
 

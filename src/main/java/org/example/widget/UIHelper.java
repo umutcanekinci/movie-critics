@@ -32,4 +32,18 @@ public class UIHelper {
             return false;
         }
     }
+
+    public static void runFatalDbCheck(Component parent, DatabaseAction action) {
+        try {
+            action.execute();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(
+                parent,
+                "A critical database error occurred:\n" + ex.getMessage() + "\nThe application will now exit.",
+                "Fatal Database Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            System.exit(1);
+        }
+    }
 }

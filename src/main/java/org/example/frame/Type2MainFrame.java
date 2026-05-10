@@ -78,8 +78,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         pack();
     }
 
-    // ── Header ────────────────────────────────────────────────────────────────
-
     private JPanel buildHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(WidgetFactory.DARK);
@@ -620,15 +618,5 @@ public class Type2MainFrame extends javax.swing.JFrame {
         dlg.setLocationRelativeTo(this);
         dlg.setVisible(true);
     }
-
-    // ── Stat card ─────────────────────────────────────────────────────────────
-
-    
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    
-
-    
 
 }

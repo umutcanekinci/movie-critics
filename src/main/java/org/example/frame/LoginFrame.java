@@ -35,6 +35,8 @@ public class LoginFrame extends javax.swing.JFrame {
         setUndecorated(true);
         initComponents();
 
+        UIHelper.runFatalDbCheck(this, () -> dbManager.checkDatabaseExists());
+
         var userList = dbManager.getAllUsers();
         isLogin = !userList.isEmpty();
 

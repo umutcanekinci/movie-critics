@@ -420,7 +420,6 @@ public class Type1MainFrame extends javax.swing.JFrame {
         contentArea.removeAll();
         contentArea.setLayout(new BorderLayout());
 
-        // Add User button
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         toolbar.setOpaque(false);
         toolbar.setBorder(BorderFactory.createEmptyBorder(0, 0, 16, 0));
@@ -429,22 +428,34 @@ public class Type1MainFrame extends javax.swing.JFrame {
         addBtn.addActionListener(e -> openUserEditDialog(null));
         toolbar.add(addBtn);
         contentArea.add(toolbar, BorderLayout.NORTH);
-
-        JPanel grid = new JPanel(new GridLayout(2, 4, 24, 24));
+        
+        JPanel grid = new JPanel(new GridLayout(0, 4, 24, 24));
         grid.setOpaque(false);
 
         List<User> children = allUsers.stream().filter(u -> u.getUserType() == 0).toList();
         List<User> parents  = allUsers.stream().filter(u -> u.getUserType() == 1).toList();
 
-        for (int i = 0; i < 4; i++) {
-            if (i < children.size()) { User u = children.get(i); grid.add(new UserCard(u, "Child",  () -> openUserEditDialog(u))); }
-            else { JPanel b = new JPanel(); b.setOpaque(false); grid.add(b); }
+        for (User u : parents) {
+            grid.add(new UserCard(u, "Parent", () -> openUserEditDialog(u)));
         }
-        for (int i = 0; i < 4; i++) {
-            if (i < parents.size()) { User u = parents.get(i); grid.add(new UserCard(u, "Parent", () -> openUserEditDialog(u))); }
-            else { JPanel b = new JPanel(); b.setOpaque(false); grid.add(b); }
+        for (User u : children) {
+            grid.add(new UserCard(u, "Child", () -> openUserEditDialog(u)));
         }
-        contentArea.add(grid, BorderLayout.CENTER);
+        
+        int remainder = allUsers.size() % 4;
+        if (remainder != 0) {
+            for (int i = 0; i < (4 - remainder); i++) {
+                JPanel b = new JPanel(); b.setOpaque(false); grid.add(b);
+            }
+        }
+
+        JScrollPane scroll = new JScrollPane(grid);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.setBorder(BorderFactory.createEmptyBorder()); 
+        scroll.getVerticalScrollBar().setUnitIncrement(16);  
+
+        contentArea.add(scroll, BorderLayout.CENTER);
         contentArea.revalidate();
         contentArea.repaint();
     }

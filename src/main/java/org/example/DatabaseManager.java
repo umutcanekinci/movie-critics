@@ -5,8 +5,7 @@ import org.example.data.Person;
 import org.example.data.User;
 import org.example.data.UserRating;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,55 +16,27 @@ public class DatabaseManager {
     private static final String COL_GENRE   = "genre";
     private static final String COL_DIR     = "director_id";
 
-    public DatabaseManager() {
-        createTables();
+    public void checkDatabaseExists() throws SQLException {
+        File dbFile = new File("db.db");
+        if (!dbFile.exists()) {
+            throw new SQLException("Connection failed! Database file 'db.db' not found. Please ensure the database is set up correctly using the provided schema.sql. See: README.md for setup instructions.");
+        }
+        
+        String checkTableSql = "SELECT name FROM sqlite_master WHERE type='table' AND name='user';";
+        try (Connection con = connect(); 
+            java.sql.PreparedStatement ps = con.prepareStatement(checkTableSql);
+            ResultSet rs = ps.executeQuery()) {
+            
+            if (!rs.next()) { 
+                throw new SQLException("Database file 'db.db' exists but is not properly initialized. The required tables are missing. Please set up the database using the provided schema.sql.");
+            }
+        }
     }
 
     private Connection connect() throws SQLException {
         return DriverManager.getConnection(URL);
     }
-
-    private void createTables() {
-        try (InputStream in = getClass().getResourceAsStream("/schema.sql")) {
-            if (in == null) throw new IllegalStateException("schema.sql not found on classpath");
-            String[] statements = new String(in.readAllBytes(), StandardCharsets.UTF_8).split(";");
-            try (Connection con = connect(); Statement stmt = con.createStatement()) {
-                runDdlPass(stmt, statements);
-                runSeedPass(stmt, statements);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void runDdlPass(Statement stmt, String[] statements) throws SQLException {
-        for (String sql : statements) {
-            String t = sql.replaceAll("--[^\n]*", "").strip();
-            if (!t.isEmpty() && t.toUpperCase().startsWith("CREATE")) stmt.addBatch(t);
-        }
-        stmt.executeBatch();
-    }
-
-    private void runSeedPass(Statement stmt, String[] statements) throws SQLException {
-        boolean hasBatch = false;
-        for (String sql : statements) {
-            String t = sql.replaceAll("--[^\n]*", "").strip();
-            if (!t.toUpperCase().startsWith("INSERT")) continue;
-            String table = tableNameFromInsert(t);
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + table);
-            if (rs.next() && rs.getInt(1) == 0) { stmt.addBatch(t); hasBatch = true; }
-        }
-        if (hasBatch) stmt.executeBatch();
-    }
-
-    private static String tableNameFromInsert(String sql) {
-        String[] words = sql.split("\\s+");
-        for (int i = 0; i < words.length - 1; i++) {
-            if (words[i].equalsIgnoreCase("INTO")) return words[i + 1];
-        }
-        throw new IllegalArgumentException("No INTO keyword found in: " + sql);
-    }
-
+    
     public List<Movie> getAllMovies() {
         return queryMovies("SELECT * FROM movie", ps -> {});
     }
