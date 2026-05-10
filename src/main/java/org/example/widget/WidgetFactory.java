@@ -10,7 +10,7 @@ public class WidgetFactory {
     public static final Color CARD_BG = new Color(25, 25, 25);
     public static final String FONT   = "Segoe UI";
 
-    private WidgetFactory() {} // Prevent instantiation
+    private WidgetFactory() {}
 
     public static JButton createFlatButton(String text, Color bg) {
         JButton btn = new JButton(text);

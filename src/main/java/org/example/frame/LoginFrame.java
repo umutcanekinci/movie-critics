@@ -68,7 +68,7 @@ public class LoginFrame extends javax.swing.JFrame {
 
         mainPanel.setBackground(new java.awt.Color(0, 0, 0));
 
-        iconLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/logo.png"))); // NOI18N
+        iconLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/logo.png")));
         iconLabel.setText("");
         iconLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
@@ -194,7 +194,7 @@ public class LoginFrame extends javax.swing.JFrame {
             return;
         }
 
-        var newUser = new User(0, username, password, 2, username); // userType 2 for regular users
+        var newUser = new User(0, username, password, 2, username);
         UIHelper.runWithDbHandler(this, () -> {
             dbManager.addUser(newUser);
             logger.info("New user registered: " + newUser.getUsername());

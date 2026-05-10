@@ -137,7 +137,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         return p;
     }
 
-    // ── Wrapper ───────────────────────────────────────────────────────────────
 
     private JPanel buildWrapper() {
         JPanel wrapper = new JPanel(new BorderLayout());
@@ -168,7 +167,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         return p;
     }
 
-    // ── Tab switching ──────────────────────────────────────────────────────────
 
     private void showTab(String tab) {
         activeTab = tab;
@@ -181,7 +179,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         }
     }
 
-    // ── Movies tab ─────────────────────────────────────────────────────────────
 
     private void navigate(int dir) {
         if (TAB_WATCHLIST.equals(activeTab)) {
@@ -252,7 +249,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         refreshMovieGrid();
     }
 
-    // ── Watchlist tab ──────────────────────────────────────────────────────────
 
     private void refreshWatchlistGrid() {
         contentArea.removeAll();
@@ -304,7 +300,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         nextBtn.setEnabled(page < totalPages - 1);
     }
 
-    // ── Progress tab ──────────────────────────────────────────────────────────
 
     private void refreshProgress() {
         contentArea.removeAll();
@@ -361,7 +356,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
             .map(Movie::getTitle).findFirst().orElse("Unknown");
     }
 
-    // ── Movie detail dialog ────────────────────────────────────────────────────
 
     private void openMovieDetailDialog(Movie movie) {
         JDialog dlg = new JDialog(this, true);
@@ -371,7 +365,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         root.setBackground(WidgetFactory.DARK);
         root.setBorder(BorderFactory.createLineBorder(WidgetFactory.PURPLE, 2));
 
-        // Title bar
         JPanel titleBar = new JPanel(new BorderLayout());
         titleBar.setBackground(new Color(30, 30, 30));
         titleBar.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 12));
@@ -384,16 +377,13 @@ public class Type2MainFrame extends javax.swing.JFrame {
         titleBar.add(closeBt, BorderLayout.EAST);
         root.add(titleBar, BorderLayout.NORTH);
 
-        // Content: poster + info
         JPanel body = new JPanel(new BorderLayout(20, 0));
         body.setBackground(WidgetFactory.DARK);
         body.setBorder(BorderFactory.createEmptyBorder(20, 24, 20, 24));
 
-        // Poster
         JPanel posterPanel = WidgetFactory.createPosterPanel(movie.getPoster(), 160, 220);
         body.add(posterPanel, BorderLayout.WEST);
 
-        // Info panel
         JPanel info = new JPanel();
         info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS));
         info.setBackground(WidgetFactory.DARK);
@@ -418,7 +408,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
             info.add(Box.createVerticalStrut(10));
         }
 
-        // Family ratings list
         List<UserRating> ratings = dbManager.getRatingsForMovie(movie.getId());
         if (!ratings.isEmpty()) {
             JLabel ratingHdr = new JLabel("Family ratings:");
@@ -444,7 +433,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         scroll.setPreferredSize(new Dimension(560, 320));
         root.add(scroll, BorderLayout.CENTER);
 
-        // Button row
         root.add(buildDetailButtons(movie, dlg), BorderLayout.SOUTH);
 
         dlg.setContentPane(root);
@@ -461,7 +449,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         left.setBackground(WidgetFactory.DARK);
 
-        // Watched toggle
         boolean watched = movie.isWatched();
         JButton watchedBtn = WidgetFactory.createFlatButton(watched ? "✓ Watched" : "Mark Watched",
             watched ? new Color(40, 120, 60) : new Color(60, 60, 60));
@@ -473,7 +460,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         });
         left.add(watchedBtn);
 
-        // Watchlist toggle
         boolean inWatchlist = dbManager.isInWatchlist(user.getId(), movie.getId());
         JButton wlBtn = WidgetFactory.createFlatButton(inWatchlist ? "– Watchlist" : "+ Watchlist",
             inWatchlist ? new Color(80, 50, 120) : WidgetFactory.PURPLE);
@@ -525,7 +511,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         });
     }
 
-    // ── Rate/Comment dialog ────────────────────────────────────────────────────
 
     private void openRateDialog(Movie movie) {
         JDialog dlg = new JDialog(this, true);
@@ -535,7 +520,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         root.setBackground(WidgetFactory.DARK);
         root.setBorder(BorderFactory.createLineBorder(WidgetFactory.PURPLE, 2));
 
-        // Title bar
         JPanel bar = new JPanel(new BorderLayout());
         bar.setBackground(new Color(30, 30, 30));
         bar.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 12));
@@ -548,7 +532,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         bar.add(x, BorderLayout.EAST);
         root.add(bar, BorderLayout.NORTH);
 
-        // Form
         JPanel form = new JPanel(new GridBagLayout());
         form.setBackground(WidgetFactory.DARK);
         form.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
@@ -558,7 +541,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
 
         UserRating existing = dbManager.getUserRating(user.getId(), movie.getId());
 
-        // Rating spinner
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 1; gbc.weightx = 0;
         form.add(WidgetFactory.createDialogLabel("Rating (1-5 stars)", 130), gbc);
         gbc.gridx = 1; gbc.weightx = 1;
@@ -570,7 +552,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         ratingSpinner.setFont(new Font(WidgetFactory.FONT, Font.PLAIN, 14));
         form.add(ratingSpinner, gbc);
 
-        // Comment area
         gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1; gbc.weightx = 0;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         form.add(WidgetFactory.createDialogLabel("Comment:", 130), gbc);
@@ -591,7 +572,6 @@ public class Type2MainFrame extends javax.swing.JFrame {
         form.add(commentScroll, gbc);
         root.add(form, BorderLayout.CENTER);
 
-        // Buttons
         JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         btns.setBackground(WidgetFactory.DARK);
         btns.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(45, 45, 45)));

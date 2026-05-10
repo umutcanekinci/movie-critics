@@ -77,7 +77,6 @@ public class Type1MainFrame extends javax.swing.JFrame {
         pack();
     }
 
-    // ── Header ────────────────────────────────────────────────────────────────
 
     private JPanel buildHeader() {
         JPanel header = new JPanel(new BorderLayout());
@@ -138,7 +137,6 @@ public class Type1MainFrame extends javax.swing.JFrame {
         return nav;
     }
 
-    // ── Wrapper ───────────────────────────────────────────────────────────────
 
     private JPanel buildWrapper() {
         JPanel wrapper = new JPanel(new BorderLayout());
@@ -169,7 +167,6 @@ public class Type1MainFrame extends javax.swing.JFrame {
         return p;
     }
 
-    // ── Tab switching ──────────────────────────────────────────────────────────
 
     private void showTab(String tab) {
         activeTab = tab;
@@ -182,7 +179,6 @@ public class Type1MainFrame extends javax.swing.JFrame {
         }
     }
 
-    // ── Movies ────────────────────────────────────────────────────────────────
 
     private void navigate(int dir) {
         int maxPage = Math.max(0, (int) Math.ceil((double) filteredMovies.size() / MOVIES_PER_PAGE) - 1);
@@ -196,7 +192,6 @@ public class Type1MainFrame extends javax.swing.JFrame {
         contentArea.removeAll();
         contentArea.setLayout(new BorderLayout());
 
-        // Toolbar: search + add button
         JPanel toolbar = buildMovieToolbar();
         contentArea.add(toolbar, BorderLayout.NORTH);
 
@@ -414,7 +409,6 @@ public class Type1MainFrame extends javax.swing.JFrame {
         dlg.setVisible(true);
     }
 
-    // ── Accounts ──────────────────────────────────────────────────────────────
 
     private void refreshAccountGrid() {
         contentArea.removeAll();
@@ -467,7 +461,6 @@ public class Type1MainFrame extends javax.swing.JFrame {
         }).setVisible(true);
     }
 
-    // ── Analytics ─────────────────────────────────────────────────────────────
 
     private void refreshAnalytics() {
         contentArea.removeAll();

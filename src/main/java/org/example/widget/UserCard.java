@@ -31,12 +31,10 @@ public class UserCard extends JPanel {
         int titleH = 36;
         int imgH   = getHeight() - titleH - 8;
 
-        // Card background
         g2.setClip(new RoundRectangle2D.Float(0, 0, getWidth(), imgH, 10, 10));
         g2.setColor(hovered ? new Color(50, 35, 75) : WidgetFactory.CARD_BG);
         g2.fillRect(0, 0, getWidth(), imgH);
 
-        // Avatar circle with first initial
         int avR = Math.min(getWidth(), imgH) / 4;
         int avX = getWidth() / 2 - avR;
         int avY = imgH / 2 - avR;
@@ -52,7 +50,6 @@ public class UserCard extends JPanel {
 
         g2.setClip(null);
 
-        // Username below
         g2.setFont(new Font(WidgetFactory.FONT, Font.BOLD, 15));
         g2.setColor(Color.WHITE);
         FontMetrics fm = g2.getFontMetrics();

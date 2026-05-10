@@ -5,23 +5,15 @@ import javax.swing.*;
 import java.awt.*;
 
 public abstract class BaseEditDialog extends JDialog implements EditDialogContract {
-
-    
-    
-    
-    protected static final Color  RED     = new Color(200, 60, 60);
-
+    protected static final Color  RED = new Color(200, 60, 60);
     protected final Runnable onSave;
 
     protected BaseEditDialog(Frame parent, Runnable onSave) {
         super(parent, true);
         this.onSave = onSave;
         setUndecorated(true);
-        // buildUI() is NOT called here — subclasses must call setup() after
-        // initialising their own fields, so interface methods see valid state.
     }
 
-    /** Call at the end of every subclass constructor. */
     protected final void setup() {
         buildUI();
         pack();
@@ -52,10 +44,6 @@ public abstract class BaseEditDialog extends JDialog implements EditDialogContra
         return bar;
     }
 
-    /**
-     * Wraps the form for the CENTER slot.  Default: returns {@code buildForm()}
-     * directly.  Override to add a JScrollPane or other decoration.
-     */
     protected JComponent buildFormWrapper() {
         return buildForm();
     }
@@ -89,14 +77,9 @@ public abstract class BaseEditDialog extends JDialog implements EditDialogContra
         return panel;
     }
 
-    // ── Default no-op delete (override in subclasses that support deletion) ──
-
     @Override
     public void doDelete() {}
 
-    // ── Shared UI helpers (not duplicated in subclasses) ──────────────────────
-
-    /** Override to adjust the label column width for wider field names. */
     protected int getLabelWidth() {
         return 110;
     }
@@ -118,8 +101,5 @@ public abstract class BaseEditDialog extends JDialog implements EditDialogContra
         lbl.setPreferredSize(new Dimension(getLabelWidth(), 28));
         return lbl;
     }
-
-    
-
     
 }
