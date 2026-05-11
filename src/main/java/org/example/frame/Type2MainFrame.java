@@ -32,7 +32,6 @@ public class Type2MainFrame extends BaseMainFrame {
         setExtendedState(MAXIMIZED_BOTH);
     }
 
-    
     @Override
     protected String[] getTabNames() {
         return new String[]{TAB_MOVIES, TAB_WATCHLIST, TAB_PROGRESS};
@@ -40,7 +39,7 @@ public class Type2MainFrame extends BaseMainFrame {
 
     @Override
     protected void onTabClicked(String tab) {
-        showTab(tab); // Artık tab repainting yapmana gerek yok, Base class hallediyor
+        showTab(tab);
     }
 
     @Override
@@ -49,6 +48,23 @@ public class Type2MainFrame extends BaseMainFrame {
         int next = moviePage + dir;
         if (next < 0 || next > maxPage) return;
         moviePage = next;
+        refreshMovieGrid();
+    }
+
+    @Override
+    protected void applyFilter() {
+        String genre    = filterGenre    != null && filterGenre.getSelectedIndex()    > 0 ? (String) filterGenre.getSelectedItem()    : null;
+        String director = filterDirector != null && filterDirector.getSelectedIndex() > 0 ? (String) filterDirector.getSelectedItem() : null;
+        String year     = filterYear     != null && filterYear.getSelectedIndex()     > 0 ? (String) filterYear.getSelectedItem()     : null;
+        
+        filteredMovies = dbManager.filterMovies(
+            filterTitle != null ? filterTitle.getText().trim() : null,
+            genre, director, year, true);
+        refreshMovieGrid();
+    }
+
+    @Override
+    protected void onFilterCleared() {
         refreshMovieGrid();
     }
 
@@ -107,23 +123,6 @@ public class Type2MainFrame extends BaseMainFrame {
         return bar;
     }
 
-    @Override
-    protected void applyFilter() {
-        String genre    = filterGenre    != null && filterGenre.getSelectedIndex()    > 0 ? (String) filterGenre.getSelectedItem()    : null;
-        String director = filterDirector != null && filterDirector.getSelectedIndex() > 0 ? (String) filterDirector.getSelectedItem() : null;
-        String year     = filterYear     != null && filterYear.getSelectedIndex()     > 0 ? (String) filterYear.getSelectedItem()     : null;
-        
-        filteredMovies = dbManager.filterMovies(
-            filterTitle != null ? filterTitle.getText().trim() : null,
-            genre, director, year, true);
-        refreshMovieGrid();
-    }
-
-    @Override
-    protected void onFilterCleared() {
-        refreshMovieGrid();
-    }
-
     private void refreshWatchlistGrid() {
         contentArea.removeAll();
         contentArea.setLayout(new BorderLayout());
@@ -173,7 +172,6 @@ public class Type2MainFrame extends BaseMainFrame {
         prevBtn.setEnabled(page > 0);
         nextBtn.setEnabled(page < totalPages - 1);
     }
-
 
     private void refreshProgress() {
         contentArea.removeAll();
@@ -229,7 +227,6 @@ public class Type2MainFrame extends BaseMainFrame {
         return allMovies.stream().filter(m -> m.getId() == movieId)
             .map(Movie::getTitle).findFirst().orElse("Unknown");
     }
-
 
     private void openMovieDetailDialog(Movie movie) {
         JDialog dlg = new JDialog(this, true);
@@ -384,7 +381,6 @@ public class Type2MainFrame extends BaseMainFrame {
             reload();
         });
     }
-
 
     private void openRateDialog(Movie movie) {
         JDialog dlg = new JDialog(this, true);

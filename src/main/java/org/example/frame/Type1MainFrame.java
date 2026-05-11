@@ -55,6 +55,23 @@ public class Type1MainFrame extends BaseMainFrame {
         refreshMovieGrid();
     }
 
+    @Override
+    protected void applyFilter() {
+        String genre    = filterGenre    != null && filterGenre.getSelectedIndex()    > 0 ? (String) filterGenre.getSelectedItem()    : null;
+        String director = filterDirector != null && filterDirector.getSelectedIndex() > 0 ? (String) filterDirector.getSelectedItem() : null;
+        String year     = filterYear     != null && filterYear.getSelectedIndex()     > 0 ? (String) filterYear.getSelectedItem()     : null;
+        filteredMovies = dbManager.filterMovies(
+            filterTitle != null ? filterTitle.getText().trim() : null,
+            genre, director, year, false);
+        moviePage = 0;
+        refreshMovieGrid();
+    }
+    
+    @Override
+    protected void onFilterCleared() {
+        refreshMovieGrid();
+    }
+
     private void reload() {
         allMovies = dbManager.getAllMovies();
         allUsers  = dbManager.getAllUsers();
@@ -142,23 +159,6 @@ public class Type1MainFrame extends BaseMainFrame {
         bar.add(filters, BorderLayout.CENTER);
         bar.add(addBtn,  BorderLayout.EAST);
         return bar;
-    }
-
-    @Override
-    protected void applyFilter() {
-        String genre    = filterGenre    != null && filterGenre.getSelectedIndex()    > 0 ? (String) filterGenre.getSelectedItem()    : null;
-        String director = filterDirector != null && filterDirector.getSelectedIndex() > 0 ? (String) filterDirector.getSelectedItem() : null;
-        String year     = filterYear     != null && filterYear.getSelectedIndex()     > 0 ? (String) filterYear.getSelectedItem()     : null;
-        filteredMovies = dbManager.filterMovies(
-            filterTitle != null ? filterTitle.getText().trim() : null,
-            genre, director, year, false);
-        moviePage = 0;
-        refreshMovieGrid();
-    }
-    
-    @Override
-    protected void onFilterCleared() {
-        refreshMovieGrid();
     }
 
     private void openMovieEditDialog(Movie movie) {
