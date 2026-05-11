@@ -53,7 +53,7 @@ CREATE TRIGGER IF NOT EXISTS trg_prevent_restricted_movie_watchlist
     WHEN (SELECT user_type FROM user WHERE user_id = NEW.user_id) = 0
         AND (SELECT parental_restriction FROM movie WHERE movie_id = NEW.movie_id) = 1
 BEGIN
-    SELECT RAISE(ABORT, 'Ebeveyn kısıtlaması: Bu film çocuk hesapları tarafından izleme listesine eklenemez!');
+    SELECT RAISE(ABORT, 'Parental restriction: this movie cannot be added to a child account watchlist.');
 END;
 
 CREATE TRIGGER IF NOT EXISTS trg_remove_from_watchlist_after_rating

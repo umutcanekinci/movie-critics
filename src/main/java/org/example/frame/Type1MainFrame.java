@@ -25,7 +25,7 @@ public class Type1MainFrame extends BaseMainFrame {
     private static final int MOVIE_COLS      = 4;
     private static final int MOVIES_PER_PAGE = MOVIE_COLS;
 
-    private transient List<User>  allUsers       = new ArrayList<>();
+    private List<User>  allUsers       = new ArrayList<>();
 
     public Type1MainFrame(DatabaseManager dbManager, User user) {
         super(dbManager, user, TAB_ACCOUNTS);
@@ -43,7 +43,7 @@ public class Type1MainFrame extends BaseMainFrame {
 
     @Override
     protected void onTabClicked(String tab) {
-        showTab(tab); // Artık tab repainting yapmana gerek yok, Base class hallediyor
+        showTab(tab);
     }
 
     @Override

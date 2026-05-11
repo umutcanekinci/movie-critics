@@ -28,7 +28,11 @@ public class MovieCard extends JPanel {
 
         String path = movie.getPoster();
         if (path != null && !path.isBlank()) {
-            try { posterImg = ImageIO.read(new File(path)); } catch (IOException ignored) {}
+            try {
+                posterImg = ImageIO.read(new File(path));
+            } catch (IOException ex) {
+                posterImg = null;
+            }
         }
 
         animTimer = new Timer(16, e -> {

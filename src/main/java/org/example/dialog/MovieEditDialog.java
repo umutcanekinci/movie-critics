@@ -2,18 +2,17 @@ package org.example.dialog;
 
 import org.example.DatabaseManager;
 import org.example.data.Movie;
-
+import org.example.widget.UIHelper;
 import org.example.widget.WidgetFactory;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 
-import org.example.widget.UIHelper;
-
 public class MovieEditDialog extends BaseEditDialog {
 
-    private final transient Movie movie;
-    private final transient DatabaseManager dbManager;
+    private final Movie movie;
+    private final DatabaseManager dbManager;
 
     private JTextField titleField;
     private JTextField yearField;

@@ -24,8 +24,8 @@ public abstract class BaseMainFrame extends javax.swing.JFrame {
     protected JButton prevBtn;
     protected JButton nextBtn;
 
-    protected transient java.util.List<Movie> allMovies = new ArrayList<>();
-    protected transient java.util.List<Movie> filteredMovies = new ArrayList<>();
+    protected java.util.List<Movie> allMovies = new ArrayList<>();
+    protected java.util.List<Movie> filteredMovies = new ArrayList<>();
     protected int moviePage = 0;
 
     protected JTextField        filterTitle;

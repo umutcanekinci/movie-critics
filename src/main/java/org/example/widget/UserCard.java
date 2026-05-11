@@ -11,10 +11,12 @@ import java.awt.geom.RoundRectangle2D;
 
 public class UserCard extends JPanel {
     private final User user;
+    private final String role;
     private boolean hovered;
 
     public UserCard(User user, String role, Runnable onEdit) {
         this.user = user;
+        this.role = role;
         setOpaque(false);
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         addMouseListener(new MouseAdapter() {
@@ -53,7 +55,7 @@ public class UserCard extends JPanel {
         g2.setFont(new Font(WidgetFactory.FONT, Font.BOLD, 15));
         g2.setColor(Color.WHITE);
         FontMetrics fm = g2.getFontMetrics();
-        String name = user.getUsername();
+        String name = user.getUsername() + " (" + role + ")";
         g2.drawString(name, (getWidth() - fm.stringWidth(name)) / 2, imgH + 8 + fm.getAscent());
         g2.dispose();
     }

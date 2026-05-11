@@ -2,17 +2,16 @@ package org.example.dialog;
 
 import org.example.DatabaseManager;
 import org.example.data.User;
-
+import org.example.widget.UIHelper;
 import org.example.widget.WidgetFactory;
+
 import javax.swing.*;
 import java.awt.*;
 
-import org.example.widget.UIHelper;
-
 public class UserEditDialog extends BaseEditDialog {
 
-    private final transient User user;
-    private final transient DatabaseManager dbManager;
+    private final User user;
+    private final DatabaseManager dbManager;
 
     private JTextField        usernameField;
     private JTextField        emailField;

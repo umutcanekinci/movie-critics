@@ -4,8 +4,8 @@ import org.example.data.User;
 import org.example.widget.FloatingLabelField;
 import org.example.widget.LogoAnimator;
 import org.example.widget.UIHelper;
-
 import org.example.widget.WidgetFactory;
+
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -16,9 +16,9 @@ public class LoginFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(LoginFrame.class.getName());
     
-    private transient DatabaseManager dbManager = new DatabaseManager();
-    
-    private transient LogoAnimator logoAnimator;
+    private DatabaseManager dbManager = new DatabaseManager();
+
+    private LogoAnimator logoAnimator;
     private boolean isLogin;
     
     private FloatingLabelField usernameFloating;

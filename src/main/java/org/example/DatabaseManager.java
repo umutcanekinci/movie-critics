@@ -11,23 +11,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseManager {
-    private static final String URL         = "jdbc:sqlite:db.db";
-    private static final String COL_TITLE   = "title";
-    private static final String COL_GENRE   = "genre";
-    private static final String COL_DIR     = "director_id";
+    private static final String URL = "jdbc:sqlite:db.db";
 
     public void checkDatabaseExists() throws SQLException {
         File dbFile = new File("db.db");
         if (!dbFile.exists()) {
             throw new SQLException("Connection failed! Database file 'db.db' not found. Please ensure the database is set up correctly using the provided schema.sql. See: README.md for setup instructions.");
         }
-        
+
         String checkTableSql = "SELECT name FROM sqlite_master WHERE type='table' AND name='user';";
-        try (Connection con = connect(); 
-            java.sql.PreparedStatement ps = con.prepareStatement(checkTableSql);
-            ResultSet rs = ps.executeQuery()) {
-            
-            if (!rs.next()) { 
+        try (Connection con = connect();
+             PreparedStatement ps = con.prepareStatement(checkTableSql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (!rs.next()) {
                 throw new SQLException("Database file 'db.db' exists but is not properly initialized. The required tables are missing. Please set up the database using the provided schema.sql.");
             }
         }
@@ -36,25 +33,51 @@ public class DatabaseManager {
     private Connection connect() throws SQLException {
         return DriverManager.getConnection(URL);
     }
-    
+
     public List<Movie> getAllMovies() {
-        return queryMovies("SELECT * FROM movie", ps -> {});
+        List<Movie> list = new ArrayList<>();
+        try (Connection con = connect();
+             Statement stmt = con.createStatement();
+             ResultSet r = stmt.executeQuery("SELECT * FROM movie")) {
+            while (r.next()) list.add(mapMovie(r));
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
     }
 
     public List<Movie> getUnrestrictedMovies() {
-        return queryMovies("SELECT * FROM movie WHERE parental_restriction = 0", ps -> {});
+        List<Movie> list = new ArrayList<>();
+        try (Connection con = connect();
+             Statement stmt = con.createStatement();
+             ResultSet r = stmt.executeQuery("SELECT * FROM movie WHERE parental_restriction = 0")) {
+            while (r.next()) list.add(mapMovie(r));
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
     }
 
     public List<Movie> filterMovies(String title, String genre, String director, String yearStr, boolean unrestrictedOnly) {
         List<String> conditions = new ArrayList<>();
         List<Object> params = new ArrayList<>();
         if (unrestrictedOnly) conditions.add("parental_restriction = 0");
-        addLikeFilter(conditions, params, COL_TITLE, title);
-        addLikeFilter(conditions, params, COL_GENRE, genre);
-        addLikeFilter(conditions, params, COL_DIR,   director);
+        addLikeFilter(conditions, params, "title", title);
+        addLikeFilter(conditions, params, "genre", genre);
+        addLikeFilter(conditions, params, "director_id", director);
         addYearFilter(conditions, params, yearStr);
+
         String where = conditions.isEmpty() ? "" : " WHERE " + String.join(" AND ", conditions);
-        return queryMovies("SELECT * FROM movie" + where, ps -> bindParams(ps, params));
+        String sql = "SELECT * FROM movie" + where;
+
+        List<Movie> list = new ArrayList<>();
+        try (Connection con = connect();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            for (int i = 0; i < params.size(); i++) {
+                Object v = params.get(i);
+                if (v instanceof Integer) ps.setInt(i + 1, (Integer) v);
+                else                      ps.setString(i + 1, (String) v);
+            }
+            ResultSet r = ps.executeQuery();
+            while (r.next()) list.add(mapMovie(r));
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
     }
 
     private static void addLikeFilter(List<String> conditions, List<Object> params, String column, String value) {
@@ -69,34 +92,17 @@ public class DatabaseManager {
         try {
             conditions.add("release_year = ?");
             params.add(Integer.parseInt(yearStr.trim()));
-        } catch (NumberFormatException _) {
-            // non-numeric year input Ã¢â‚¬â€ skip filter
+        } catch (NumberFormatException ex) {
+            // non-numeric year input - skip filter
         }
-    }
-
-    private static void bindParams(PreparedStatement ps, List<Object> params) {
-        try {
-            for (int i = 0; i < params.size(); i++) {
-                Object v = params.get(i);
-                if (v instanceof Integer iv) ps.setInt(i + 1, iv);
-                else ps.setString(i + 1, (String) v);
-            }
-        } catch (SQLException e) { e.printStackTrace(); }
     }
 
     public List<Movie> getWatchlistMovies(int userId) {
         String sql = "SELECT m.* FROM movie m JOIN watchlist w ON m.movie_id = w.movie_id WHERE w.user_id = ?";
-        return queryMovies(sql, ps -> {
-            try { ps.setInt(1, userId); } catch (SQLException e) { e.printStackTrace(); }
-        });
-    }
-
-    private interface PsSetter { void set(PreparedStatement ps); }
-
-    private List<Movie> queryMovies(String sql, PsSetter setter) {
         List<Movie> list = new ArrayList<>();
-        try (Connection con = connect(); PreparedStatement ps = con.prepareStatement(sql)) {
-            setter.set(ps);
+        try (Connection con = connect();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, userId);
             ResultSet r = ps.executeQuery();
             while (r.next()) list.add(mapMovie(r));
         } catch (SQLException e) { e.printStackTrace(); }
@@ -105,9 +111,9 @@ public class DatabaseManager {
 
     private Movie mapMovie(ResultSet r) throws SQLException {
         return new Movie(
-            r.getInt("movie_id"), r.getString(COL_TITLE), r.getInt("release_year"),
-            r.getString("language"), r.getString("country_of_origin"), r.getString(COL_GENRE),
-            r.getString(COL_DIR), r.getBoolean("is_watched"),
+            r.getInt("movie_id"), r.getString("title"), r.getInt("release_year"),
+            r.getString("language"), r.getString("country_of_origin"), r.getString("genre"),
+            r.getString("director_id"), r.getBoolean("is_watched"),
             r.getString("leading_actor_id"), r.getString("supporting_actor_id"),
             r.getString("about"), r.getInt("rating"), r.getString("comments"),
             r.getString("poster"), r.getBoolean("parental_restriction"));
@@ -116,19 +122,26 @@ public class DatabaseManager {
     public void addMovie(Movie movie) throws SQLException {
         String sql = "INSERT INTO movie(title,release_year,language,country_of_origin,genre,director_id,is_watched,leading_actor_id,supporting_actor_id,about,rating,comments,poster,parental_restriction) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         try (Connection con = connect(); PreparedStatement ps = con.prepareStatement(sql)) {
-            setMovieParams(ps, movie); ps.executeUpdate();
+            setMovieParams(ps, movie);
+            ps.executeUpdate();
         }
     }
 
     public void updateMovie(Movie movie) throws SQLException {
         String sql = "UPDATE movie SET title=?,release_year=?,language=?,country_of_origin=?,genre=?,director_id=?,is_watched=?,leading_actor_id=?,supporting_actor_id=?,about=?,rating=?,comments=?,poster=?,parental_restriction=? WHERE movie_id=?";
         try (Connection con = connect(); PreparedStatement ps = con.prepareStatement(sql)) {
-            setMovieParams(ps, movie); ps.setInt(15, movie.getId()); ps.executeUpdate();
+            setMovieParams(ps, movie);
+            ps.setInt(15, movie.getId());
+            ps.executeUpdate();
         }
     }
 
     public void deleteMovie(int id) throws SQLException {
-        execute("DELETE FROM movie WHERE movie_id = ?", ps -> ps.setInt(1, id));
+        try (Connection con = connect();
+             PreparedStatement ps = con.prepareStatement("DELETE FROM movie WHERE movie_id = ?")) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
     }
 
     private void setMovieParams(PreparedStatement ps, Movie m) throws SQLException {
@@ -179,7 +192,11 @@ public class DatabaseManager {
     }
 
     public void deleteUser(int id) throws SQLException {
-        execute("DELETE FROM user WHERE user_id = ?", ps -> ps.setInt(1, id));
+        try (Connection con = connect();
+             PreparedStatement ps = con.prepareStatement("DELETE FROM user WHERE user_id = ?")) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
     }
 
     private User mapUser(ResultSet r) throws SQLException {
@@ -208,7 +225,11 @@ public class DatabaseManager {
     }
 
     public void deletePerson(int id) throws SQLException {
-        execute("DELETE FROM person WHERE person_id = ?", ps -> ps.setInt(1, id));
+        try (Connection con = connect();
+             PreparedStatement ps = con.prepareStatement("DELETE FROM person WHERE person_id = ?")) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
     }
 
     public void addToWatchlist(int userId, int movieId) throws SQLException {
@@ -221,8 +242,12 @@ public class DatabaseManager {
     }
 
     public void removeFromWatchlist(int userId, int movieId) throws SQLException {
-        execute("DELETE FROM watchlist WHERE user_id=? AND movie_id=?",
-            ps -> { ps.setInt(1, userId); ps.setInt(2, movieId); });
+        try (Connection con = connect();
+             PreparedStatement ps = con.prepareStatement("DELETE FROM watchlist WHERE user_id=? AND movie_id=?")) {
+            ps.setInt(1, userId);
+            ps.setInt(2, movieId);
+            ps.executeUpdate();
+        }
     }
 
     public boolean isInWatchlist(int userId, int movieId) {
@@ -266,7 +291,11 @@ public class DatabaseManager {
     }
 
     public void deleteRating(int ratingId) throws SQLException {
-        execute("DELETE FROM user_rating WHERE id = ?", ps -> ps.setInt(1, ratingId));
+        try (Connection con = connect();
+             PreparedStatement ps = con.prepareStatement("DELETE FROM user_rating WHERE id = ?")) {
+            ps.setInt(1, ratingId);
+            ps.executeUpdate();
+        }
     }
 
     private UserRating mapRating(ResultSet r) throws SQLException {
@@ -286,21 +315,19 @@ public class DatabaseManager {
         String sql = "SELECT genre, COUNT(*) c FROM movie GROUP BY genre ORDER BY c DESC LIMIT 1";
         try (Connection con = connect(); Statement stmt = con.createStatement();
              ResultSet r = stmt.executeQuery(sql)) {
-            if (r.next()) return r.getString(COL_GENRE);
+            if (r.next()) return r.getString("genre");
         } catch (SQLException e) { e.printStackTrace(); }
-        return "Ã¢â‚¬â€";
+        return "-";
     }
 
     public int countRatingsByUser(int userId) {
-        return queryInt("SELECT COUNT(*) FROM user_rating WHERE user_id = " + userId);
-    }
-
-    private interface ThrowingPsSetter { void set(PreparedStatement ps) throws SQLException; }
-
-    private void execute(String sql, ThrowingPsSetter setter) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM user_rating WHERE user_id = ?";
         try (Connection con = connect(); PreparedStatement ps = con.prepareStatement(sql)) {
-            setter.set(ps); ps.executeUpdate();
-        }
+            ps.setInt(1, userId);
+            ResultSet r = ps.executeQuery();
+            if (r.next()) return r.getInt(1);
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
     }
 
     private int queryInt(String sql) {
