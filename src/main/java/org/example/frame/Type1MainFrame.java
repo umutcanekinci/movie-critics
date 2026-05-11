@@ -13,7 +13,6 @@ import org.example.widget.UIHelper;
 import org.example.widget.WidgetFactory;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,15 +25,7 @@ public class Type1MainFrame extends BaseMainFrame {
     private static final int MOVIE_COLS      = 4;
     private static final int MOVIES_PER_PAGE = MOVIE_COLS;
 
-    private transient List<Movie> allMovies      = new ArrayList<>();
-    private transient List<Movie> filteredMovies = new ArrayList<>();
     private transient List<User>  allUsers       = new ArrayList<>();
-    private int moviePage = 0;
-
-    private JTextField        filterTitle;
-    private JComboBox<String> filterGenre;
-    private JComboBox<String> filterDirector;
-    private JComboBox<String> filterYear;
 
     public Type1MainFrame(DatabaseManager dbManager, User user) {
         super(dbManager, user, TAB_ACCOUNTS);
@@ -153,17 +144,8 @@ public class Type1MainFrame extends BaseMainFrame {
         return bar;
     }
 
-    private JComboBox<String> filterCombo(String allLabel, List<String> items) {
-        JComboBox<String> cb = new JComboBox<>();
-        cb.addItem(allLabel);
-        items.forEach(cb::addItem);
-        cb.setBackground(new Color(35, 35, 35));
-        cb.setForeground(Color.WHITE);
-        cb.setFont(new Font(WidgetFactory.FONT, Font.PLAIN, 13));
-        return cb;
-    }
-
-    private void applyFilter() {
+    @Override
+    protected void applyFilter() {
         String genre    = filterGenre    != null && filterGenre.getSelectedIndex()    > 0 ? (String) filterGenre.getSelectedItem()    : null;
         String director = filterDirector != null && filterDirector.getSelectedIndex() > 0 ? (String) filterDirector.getSelectedItem() : null;
         String year     = filterYear     != null && filterYear.getSelectedIndex()     > 0 ? (String) filterYear.getSelectedItem()     : null;
@@ -173,14 +155,9 @@ public class Type1MainFrame extends BaseMainFrame {
         moviePage = 0;
         refreshMovieGrid();
     }
-
-    private void clearFilter() {
-        if (filterTitle    != null) filterTitle.setText("");
-        if (filterGenre    != null) filterGenre.setSelectedIndex(0);
-        if (filterDirector != null) filterDirector.setSelectedIndex(0);
-        if (filterYear     != null) filterYear.setSelectedIndex(0);
-        filteredMovies = new ArrayList<>(allMovies);
-        moviePage = 0;
+    
+    @Override
+    protected void onFilterCleared() {
         refreshMovieGrid();
     }
 
@@ -302,7 +279,6 @@ public class Type1MainFrame extends BaseMainFrame {
         dlg.setVisible(true);
     }
 
-
     private void refreshAccountGrid() {
         contentArea.removeAll();
         contentArea.setLayout(new BorderLayout());
@@ -354,7 +330,6 @@ public class Type1MainFrame extends BaseMainFrame {
         }).setVisible(true);
     }
 
-
     private void refreshAnalytics() {
         contentArea.removeAll();
         contentArea.setLayout(new BorderLayout(0, 24));
@@ -388,6 +363,4 @@ public class Type1MainFrame extends BaseMainFrame {
         contentArea.repaint();
     }
 
-    
- 
 }

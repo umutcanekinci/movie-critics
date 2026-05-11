@@ -1,12 +1,14 @@
 package org.example.frame;
 
 import org.example.DatabaseManager;
+import org.example.data.Movie;
 import org.example.data.User;
 import org.example.widget.WidgetFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -21,6 +23,15 @@ public abstract class BaseMainFrame extends javax.swing.JFrame {
     protected JPanel contentArea;
     protected JButton prevBtn;
     protected JButton nextBtn;
+
+    protected transient java.util.List<Movie> allMovies = new ArrayList<>();
+    protected transient java.util.List<Movie> filteredMovies = new ArrayList<>();
+    protected int moviePage = 0;
+
+    protected JTextField        filterTitle;
+    protected JComboBox<String> filterGenre;
+    protected JComboBox<String> filterDirector;
+    protected JComboBox<String> filterYear;
 
     public BaseMainFrame(DatabaseManager dbManager, User user, String initialTab) {
         this.dbManager = dbManager;
@@ -138,6 +149,29 @@ public abstract class BaseMainFrame extends javax.swing.JFrame {
         return p;
     }
 
+    protected JComboBox<String> filterCombo(String allLabel, java.util.List<String> items) {
+        JComboBox<String> cb = new JComboBox<>();
+        cb.addItem(allLabel);
+        items.forEach(cb::addItem);
+        cb.setBackground(new Color(35, 35, 35));
+        cb.setForeground(Color.WHITE);
+        cb.setFont(new Font(WidgetFactory.FONT, Font.PLAIN, 13));
+        return cb;
+    }
+
+    protected void clearFilter() {
+        if (filterTitle != null) filterTitle.setText("");
+        if (filterGenre != null) filterGenre.setSelectedIndex(0);
+        if (filterDirector != null) filterDirector.setSelectedIndex(0);
+        if (filterYear != null) filterYear.setSelectedIndex(0);
+        filteredMovies = new ArrayList<>(allMovies);
+        moviePage = 0;
+
+        onFilterCleared();
+    }
+
+    protected abstract void onFilterCleared();
+    protected abstract void applyFilter();
     protected abstract String[] getTabNames();
     protected abstract void onTabClicked(String tab);
     protected abstract void navigate(int dir);

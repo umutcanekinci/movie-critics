@@ -20,16 +20,8 @@ public class Type2MainFrame extends BaseMainFrame {
     private static final String TAB_WATCHLIST   = "Watchlist";
     private static final String TAB_PROGRESS    = "Progress";
 
-    private transient List<Movie> allMovies       = new ArrayList<>();
-    private transient List<Movie> filteredMovies  = new ArrayList<>();
     private transient List<Movie> watchlistMovies = new ArrayList<>();
-    private int moviePage     = 0;
     private int watchlistPage = 0;
-
-    private JTextField filterTitle;
-    private JTextField filterGenre;
-    private JTextField filterDirector;
-    private JTextField filterYear;
 
     public Type2MainFrame(DatabaseManager dbManager, User user) {
         super(dbManager, user, TAB_MOVIES);
@@ -94,10 +86,15 @@ public class Type2MainFrame extends BaseMainFrame {
         bar.setOpaque(false);
         bar.setBorder(BorderFactory.createEmptyBorder(0, 0, 16, 0));
 
-        filterTitle    = WidgetFactory.createFilterField(180, "Title…");
-        filterGenre    = WidgetFactory.createFilterField(110, "Genre…");
-        filterDirector = WidgetFactory.createFilterField(130, "Director…");
-        filterYear     = WidgetFactory.createFilterField(65,  "Year");
+        filterTitle = WidgetFactory.createFilterField(180, "Title…");
+
+        List<String> genres    = allMovies.stream().map(Movie::getGenre).filter(s -> s != null && !s.isBlank()).distinct().sorted().toList();
+        List<String> directors = allMovies.stream().map(Movie::getDirectorId).filter(s -> s != null && !s.isBlank()).distinct().sorted().toList();
+        List<String> years     = allMovies.stream().map(m -> String.valueOf(m.getReleaseYear())).distinct().sorted().toList();
+
+        filterGenre    = filterCombo("All Genres",    genres);
+        filterDirector = filterCombo("All Directors", directors);
+        filterYear     = filterCombo("All Years",     years);
 
         JButton filterBtn = WidgetFactory.createToolbarButton("Filter");
         filterBtn.addActionListener(e -> applyFilter());
@@ -110,27 +107,22 @@ public class Type2MainFrame extends BaseMainFrame {
         return bar;
     }
 
-    private void applyFilter() {
+    @Override
+    protected void applyFilter() {
+        String genre    = filterGenre    != null && filterGenre.getSelectedIndex()    > 0 ? (String) filterGenre.getSelectedItem()    : null;
+        String director = filterDirector != null && filterDirector.getSelectedIndex() > 0 ? (String) filterDirector.getSelectedItem() : null;
+        String year     = filterYear     != null && filterYear.getSelectedIndex()     > 0 ? (String) filterYear.getSelectedItem()     : null;
+        
         filteredMovies = dbManager.filterMovies(
-            filterTitle    != null ? filterTitle.getText().trim()    : null,
-            filterGenre    != null ? filterGenre.getText().trim()    : null,
-            filterDirector != null ? filterDirector.getText().trim() : null,
-            filterYear     != null ? filterYear.getText().trim()     : null,
-            true);
-        moviePage = 0;
+            filterTitle != null ? filterTitle.getText().trim() : null,
+            genre, director, year, true);
         refreshMovieGrid();
     }
 
-    private void clearFilter() {
-        if (filterTitle    != null) filterTitle.setText("");
-        if (filterGenre    != null) filterGenre.setText("");
-        if (filterDirector != null) filterDirector.setText("");
-        if (filterYear     != null) filterYear.setText("");
-        filteredMovies = new ArrayList<>(allMovies);
-        moviePage = 0;
+    @Override
+    protected void onFilterCleared() {
         refreshMovieGrid();
     }
-
 
     private void refreshWatchlistGrid() {
         contentArea.removeAll();
