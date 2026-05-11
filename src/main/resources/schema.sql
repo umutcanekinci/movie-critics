@@ -124,3 +124,19 @@ INSERT OR IGNORE INTO user (username, password, user_type, email) VALUES
 ('child1', 'pass123', 0, 'child1@example.com'),
 ('child2', 'pass123', 0, 'child2@example.com'),
 ('child3', 'pass123', 0, 'child3@example.com');
+
+INSERT OR IGNORE INTO watchlist (user_id, movie_id) VALUES
+(4, 2),
+(4, 4),
+(5, 3),
+(5, 5),
+(6, 1),
+(6, 2);
+
+INSERT OR IGNORE INTO user_rating (user_id, movie_id, rating, comment) VALUES
+(4, 1, 5, 'Mind-blowing, especially the ending!'),
+(5, 1, 4, 'Confusing at first but amazing.'),
+(5, 2, 5, 'Heath Ledger was incredible.'),
+(6, 5, 5, 'My favorite movie of all time!'),
+(3, 1, 5, 'Cinematic masterpiece by Nolan.'),
+(3, 3, 4, 'Brilliantly twisted plot.');

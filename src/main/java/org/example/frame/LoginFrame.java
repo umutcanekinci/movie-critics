@@ -163,7 +163,6 @@ public class LoginFrame extends javax.swing.JFrame {
         var username = usernameField.getText();
         var password = passwordField.getText();
         
-        
         if (username.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter both username and password", "Input Error", JOptionPane.ERROR_MESSAGE);
             return;
